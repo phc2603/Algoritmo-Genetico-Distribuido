@@ -46,7 +46,7 @@ class CoordenadarLogica:
 
     def receber_migracao(self, request) -> bool:
         origem = request.origem
-        ts     = request.lamport_ts
+        ts = request.lamport_ts
 
         self.relogio.ao_receber(ts)
 

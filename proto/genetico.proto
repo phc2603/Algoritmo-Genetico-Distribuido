@@ -12,7 +12,7 @@
   message Individuo {
     repeated string genes   = 1;
     float aptidao = 2;
-    int32   geracao = 3;
+    int32 geracao = 3;
   }
 
   message MensagemMigracao {
