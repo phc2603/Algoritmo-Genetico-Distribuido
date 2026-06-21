@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────
-# run_all.py — Orquestrador: inicia todos os nós, exibe logs unificados
-#              e mostra tabela de status periódica via gRPC.
-#
-# Uso:
-#   python run_all.py
-#   Ctrl+C para encerrar tudo.
-# ──────────────────────────────────────────────────────────────────────────────
-
 import subprocess
 import threading
 import sys

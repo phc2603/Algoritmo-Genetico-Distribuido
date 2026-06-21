@@ -1,11 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# versao_local.py — Versão local (single-machine) do AG para o TSP
-#
-# Serve como baseline de comparação com a versão distribuída.
-# Usa a mesma população total (5 × 200 = 1000) e os mesmos operadores genéticos,
-# mas evolui tudo em um único processo sem nenhuma distribuição.
-# ──────────────────────────────────────────────────────────────────────────────
-
 import time
 import logging
 import genetico_core as ga

@@ -1,17 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# cenarios_falha.py — Estudo e teste de tolerância a falhas
-#
-# Simula os principais cenários de falha do sistema distribuído e documenta
-# o comportamento observado e as soluções implementadas.
-#
-# Cenários cobertos:
-#   1. Falha do coordenador em plena operação → eleição de novo líder
-#   2. Falha de nó trabalhador → threshold absorve a ausência
-#   3. Falha durante redistribuição parcial → novo ciclo reiniciado
-#   4. Nó lento (timeout de migração) → sistema não bloqueia
-#   5. Falso positivo de falha (rede lenta) → timeout calibrado
-# ──────────────────────────────────────────────────────────────────────────────
-
 import time
 import logging
 import threading

@@ -173,6 +173,7 @@ manualmente.
 
 ```bash
 pip install -r requirements.txt
+Instalar todas as dependências e bibliotecas utilizadas no projeto.
 ```
 
 Para regenerar os arquivos gRPC após alterar o .proto:

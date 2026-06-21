@@ -1,12 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# relogio_lamport.py — Relógio Lógico de Lamport
-#
-# Regra:
-#   - Evento local:          tempo += 1
-#   - Antes de enviar:       tempo += 1  (inclui o valor na mensagem)
-#   - Ao receber mensagem T: tempo = max(tempo, T) + 1
-# ──────────────────────────────────────────────────────────────────────────────
-
 import threading
 
 

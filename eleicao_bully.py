@@ -1,14 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# eleicao_bully.py — Algoritmo do Valentão (Bully) para eleição de líder
-#
-# Fluxo:
-#  1. Nó detecta falha do coordenador (timeout no heartbeat)
-#  2. Envia MensagemEleicao a todos os nós com ID maior
-#  3. Se algum responder → ele assume a eleição
-#  4. Se nenhum responder → este nó se proclama líder
-#  5. Novo líder envia MensagemLider a todos os nós ativos
-# ──────────────────────────────────────────────────────────────────────────────
-
 import threading
 import time
 import logging
