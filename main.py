@@ -117,9 +117,9 @@ if __name__ == "__main__":
         print("Algoritmo Genético Distribuído — TSP")
         print("=" * 52)
         print("\nUso recomendado (inicia tudo de uma vez):")
-        print("  python run_all.py")
+        print("python run_all.py")
         print("\nUso individual:")
-        print("  python main.py <id_do_no>")
+        print("python main.py <id_do_no>")
         print("\nNós disponíveis:")
         for nid, addr in NOS.items():
             coord = "← coordenador inicial" if nid == ID_COORDENADOR_INICIAL else ""
