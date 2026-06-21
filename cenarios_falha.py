@@ -45,9 +45,9 @@ def criar_mensagem_migracao_mock(origem: str, ciclo: int, lamport_ts: int):
             self.aptidao = ga.fitness(ind)
             self.geracao = ciclo * 50
 
-    msg             = MagicMock()
-    msg.origem      = origem
-    msg.ciclo       = ciclo
+    msg  = MagicMock()
+    msg.origem = origem
+    msg.ciclo = ciclo
     msg.lamport_ts  = lamport_ts
     msg.individuos  = [IndividuoMock(ind) for ind in populacao]
     return msg

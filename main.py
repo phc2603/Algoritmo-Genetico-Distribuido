@@ -15,7 +15,7 @@ from concurrent import futures
 import genetico_pb2
 import genetico_pb2_grpc
 from no_servidor import NoServidor
-from config import NOS, ID_COORDENADOR_INICIAL, TIMEOUT_RPC
+from config import NOS, ID_COORDENADOR_INICIAL
 
 logging.basicConfig(
     level=logging.INFO,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         print("  python main.py <id_do_no>")
         print("\nNós disponíveis:")
         for nid, addr in NOS.items():
-            coord = "  ← coordenador inicial" if nid == ID_COORDENADOR_INICIAL else ""
+            coord = "← coordenador inicial" if nid == ID_COORDENADOR_INICIAL else ""
             print(f"  {nid} → {addr}{coord}")
         sys.exit(0)
 
