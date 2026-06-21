@@ -300,4 +300,3 @@ locais.
 | Nó trabalhador offline      | Threshold de 80% absorve a ausência               |
 | Dados chegam fora de ordem  | Descarte via timestamp de Lamport                 |
 | Redistribuição incompleta   | Timeout de 10s + reinício do ciclo seguinte       |
-| Rede lenta vs nó morto      | Timeout calibrado de 5s no heartbeat              |
