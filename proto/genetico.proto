@@ -1,0 +1,52 @@
+  syntax = "proto3";
+  package genetico;
+
+  service GeneticoService {
+    rpc EnviarMelhores    (MensagemMigracao)       returns (Confirmacao);
+    rpc ReceberMigrantes  (MensagemRedistribuicao) returns (Confirmacao);
+    rpc ReceberEleicao    (MensagemEleicao)        returns (Confirmacao);
+    rpc ReceberLider      (MensagemLider)          returns (Confirmacao);
+    rpc ObterStatus       (Vazio)                  returns (Status);
+  }
+
+  message Individuo {
+    repeated string genes   = 1;
+    float aptidao = 2;
+    int32   geracao = 3;
+  }
+
+  message MensagemMigracao {
+    repeated Individuo individuos = 1;
+    int64  lamport_ts  = 2;
+    string origem = 3;
+    int32 ciclo = 4;
+  }
+
+  message MensagemRedistribuicao {
+    repeated Individuo individuos = 1;
+    int64 lamport_ts  = 2;
+  }
+
+  message MensagemEleicao {
+    int32 id_origem = 1;
+  }
+
+  message MensagemLider {
+    int32  id_lider  = 1;
+    string endereco  = 2;
+  }
+
+  message Confirmacao {
+    bool ok = 1;
+    string mensagem = 2;
+  }
+
+  message Status {
+    int32  no_id = 1;
+    int32  ciclo_atual = 2;
+    int32  geracao_atual = 3;
+    float  melhor_aptidao = 4;
+    string melhor_rota = 5;
+  }
+
+  message Vazio {}

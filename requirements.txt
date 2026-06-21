@@ -1,0 +1,13 @@
+# ── Comunicação distribuída (gRPC) ────────────────────────────────────────────
+grpcio>=1.59.0
+grpcio-tools>=1.59.0
+
+# ── Dashboard de monitoramento (dashboard.py) ─────────────────────────────────
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
+# ── Benchmark e gráficos comparativos (benchmark.py) ─────────────────────────
+matplotlib>=3.8.0
+
+# ── Utilitário HTTP (consultas REST opcionais) ────────────────────────────────
+httpx>=0.27.0
