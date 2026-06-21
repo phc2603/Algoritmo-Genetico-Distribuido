@@ -26,7 +26,7 @@ import genetico_core as ga
 import versao_local
 from config import (
     TAMANHO_POPULACAO, NUM_MIGRANTES, GERACOES_POR_CICLO, MAX_CICLOS,
-    CICLOS_SEM_MELHORA_MAX, DELTA_CONVERGENCIA,
+    CICLOS_SEM_MELHORA_MAX, DELTA_CONVERGENCIA, CIDADES
 )
 
 logging.basicConfig(
@@ -36,8 +36,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-NUM_NOS   = 5
-SEMENTE   = 42
+NUM_NOS = 5
+SEMENTE = 42
 
 
 # ── Versão distribuída simulada ───────────────────────────────────────────────
@@ -366,10 +366,10 @@ def gerar_graficos(res_local: dict, res_dist: dict, salvar_em: str = "benchmark_
 if __name__ == "__main__":
     print("\n" + "="*65)
     print("BENCHMARK — Algoritmo Genético: Local vs Distribuído")
-    print(f"  Cidades    : 20")
-    print(f"  Pop. total : {NUM_NOS} × {TAMANHO_POPULACAO} = {NUM_NOS*TAMANHO_POPULACAO}")
-    print(f"  Ger./ciclo : {GERACOES_POR_CICLO}")
-    print(f"  Semente    : {SEMENTE}")
+    print(f"Cidades: {len(CIDADES)}")
+    print(f"Pop. total: {NUM_NOS} × {TAMANHO_POPULACAO} = {NUM_NOS*TAMANHO_POPULACAO}")
+    print(f"Ger./ciclo: {GERACOES_POR_CICLO}")
+    print(f"Semente: {SEMENTE}")
     print("="*65 + "\n")
 
     print("► Rodando versão LOCAL...")
@@ -387,9 +387,9 @@ if __name__ == "__main__":
 
     # Salva resultados em JSON
     resultados = {
-        "local"      : {k: v if not isinstance(v, list) or not v or not isinstance(v[0], str)
-                          else v
-                          for k, v in res_local.items()},
+        "local": {k: v if not isinstance(v, list) or not v or not isinstance(v[0], str)
+                    else v
+                    for k, v in res_local.items()},
         "distribuido": {k: v if not isinstance(v, list) or not v or not isinstance(v[0], str)
                           else v
                           for k, v in res_dist.items()},

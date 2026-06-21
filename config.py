@@ -1,8 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# config.py — Configurações centrais do sistema
-# Altere os endereços dos nós conforme a sua rede local.
-# ──────────────────────────────────────────────────────────────────────────────
-
 # Mapa de nós: {id_inteiro: "host:porta"}
 # Em produção, substitua "localhost" pelos IPs reais das máquinas.
 NOS = {
@@ -19,7 +14,7 @@ ID_COORDENADOR_INICIAL = 2
 # ── Parâmetros do Algoritmo Genético ──────────────────────────────────────────
 TAMANHO_POPULACAO = 200   # indivíduos por nó
 NUM_MIGRANTES = 20  # melhores enviados ao coordenador por ciclo
-GERACOES_POR_CICLO = 50  # gerações de evolução local antes de migrar
+GERACOES_POR_CICLO = 100  # gerações de evolução local antes de migrar
 MAX_CICLOS = 100   # máximo de ciclos de migração (Quantidade de reproduções e execuções do AG)
 THRESHOLD = 0.80  # fração mínima de nós para o coord. processar (80%)
 TAXA_MUTACAO = 0.10  # probabilidade de mutação por indivíduo
@@ -27,12 +22,12 @@ TAMANHO_TORNEIO = 3   # participantes por torneio na seleção
 SEMENTE_INICIAL = 42 #garante reproducibilidade entre execuções
 
 # Ciclos consecutivos sem melhora para considerar convergência
-CICLOS_SEM_MELHORA_MAX = 10 #condição de parada caso não consiga mais convergir
-DELTA_CONVERGENCIA = 0.001   # melhora mínima considerada significativa
+CICLOS_SEM_MELHORA_MAX = 5 #condição de parada caso não consiga mais convergir
+DELTA_CONVERGENCIA = 0.000001 # melhora mínima considerada significativa
 
 # ── Heartbeat / detecção de falha ─────────────────────────────────────────────
-TIMEOUT_RPC = 5    # timeout (s) de chamadas gRPC de monitoramento
-INTERVALO_HEARTBEAT = 3   # intervalo (s) entre verificações do líder
+TIMEOUT_RPC = 5  # timeout (s) de chamadas gRPC de monitoramento
+INTERVALO_HEARTBEAT = 3  #intervalo (s) entre verificações do líder
 
 # ── Cidades do TSP (nome: (x, y)) ─────────────────────────────────────────────
 CIDADES = {

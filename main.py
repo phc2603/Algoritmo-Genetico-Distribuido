@@ -31,8 +31,8 @@ def aguardar_coordenador(meu_id: int, max_tentativas: int = 20):
         return
 
     endereco = NOS[ID_COORDENADOR_INICIAL]
-    canal    = grpc.insecure_channel(endereco)
-    stub     = genetico_pb2_grpc.GeneticoServiceStub(canal)
+    canal = grpc.insecure_channel(endereco)
+    stub = genetico_pb2_grpc.GeneticoServiceStub(canal)
 
     logger.info(
         f"[Nó {meu_id}] Aguardando coordenador M{ID_COORDENADOR_INICIAL} ({endereco})..."

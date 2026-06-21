@@ -1,14 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# dashboard.py — Dashboard de monitoramento em tempo real (FastAPI)
-#
-# Expõe uma API REST que consulta o status de cada nó via gRPC e serve
-# uma interface HTML simples com atualização automática a cada 3 segundos.
-#
-# Uso:
-#   python dashboard.py
-#   Acesse: http://localhost:8080
-# ──────────────────────────────────────────────────────────────────────────────
-
 import grpc
 import logging
 from typing import Optional
@@ -221,5 +210,5 @@ HTML_DASHBOARD = """<!DOCTYPE html>
 
 if __name__ == "__main__":
     print("Dashboard rodando em: http://localhost:8080")
-    print("Consulte a API em:    http://localhost:8080/api/status")
+    print("Consulte a API em: http://localhost:8080/api/status")
     uvicorn.run(app, host="0.0.0.0", port=8080, log_level="warning")

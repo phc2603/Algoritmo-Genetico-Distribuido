@@ -106,7 +106,7 @@ def exibir_status():
     melhor_global = None
 
     for nid in sorted(NOS):
-        s   = statuses[nid]
+        s = statuses[nid]
         cor = COR.get(nid, '')
         tag = " (coord)" if nid == ID_COORDENADOR_INICIAL else ""
         nome = f"M{nid}{tag}"

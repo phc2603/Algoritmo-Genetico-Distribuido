@@ -48,8 +48,8 @@ def criar_mensagem_migracao_mock(origem: str, ciclo: int, lamport_ts: int):
     msg  = MagicMock()
     msg.origem = origem
     msg.ciclo = ciclo
-    msg.lamport_ts  = lamport_ts
-    msg.individuos  = [IndividuoMock(ind) for ind in populacao]
+    msg.lamport_ts = lamport_ts
+    msg.individuos = [IndividuoMock(ind) for ind in populacao]
     return msg
 
 
@@ -68,21 +68,6 @@ def log_resultado(passou: bool, descricao: str):
 
 def cenario_1_falha_coordenador():
     log_cenario(1, "Falha do coordenador — eleição de novo líder")
-
-    print("""
-  DESCRIÇÃO:
-    O coordenador (M2) fica indisponível durante a operação.
-    Os outros nós detectam a falha via timeout no heartbeat e
-    iniciam o Algoritmo do Valentão para eleger um novo líder.
-
-  IMPLEMENTAÇÃO:
-    - Thread de monitoramento em cada nó chama ObterStatus periodicamente
-    - Se timeout → inicia_eleicao()
-    - Nó com maior ID ativo vence e se torna coordenador
-    - Novo coordenador reinicia CoordenadarLogica e aguarda migrações
-
-  SIMULAÇÃO:
-    """)
 
     # Simula detecção de falha e eleição
     resultados_eleicao = []
@@ -105,9 +90,9 @@ def cenario_1_falha_coordenador():
                     "tempo_eleicao": time.perf_counter(),
                 })
 
-    lider_falho  = 2    # M2 falhou
-    t0           = time.perf_counter()
-    threads      = [
+    lider_falho  = 2# M2 falhou, por ex
+    t0  = time.perf_counter()
+    threads = [
         threading.Thread(target=simular_no, args=(nid, lider_falho))
         for nid in NOS if nid != lider_falho
     ]
@@ -139,40 +124,29 @@ def cenario_1_falha_coordenador():
 
 
 # ── Cenário 2: Falha de nó trabalhador → threshold absorve ───────────────────
-
 def cenario_2_falha_trabalhador():
-    log_cenario(2, "Falha de nó trabalhador — threshold de 80% absorve")
-
-    print("""
-  DESCRIÇÃO:
-    Um nó trabalhador (ex: M4) fica indisponível durante um ciclo.
-    O coordenador usa threshold de 80% (4 de 5 nós) para processar
-    mesmo sem receber de todos, evitando que um único nó bloqueie o sistema.
-
-  SIMULAÇÃO:
-    """)
-
-    coord = CoordenadarLogica(meu_id=2)
-
-    # Simula envio de 4 dos 5 nós (M4 falhou — não envia)
-    nos_ativos = ["M1", "M3", "M5"]    # M2 é o coord, M4 falhou
+    log_cenario(2, "Falha de nó trabalhador — threshold de 0.8 absorve")
 
     redistribuicoes = []
     lock_r = threading.Lock()
 
-    # Monkey-patch para capturar redistribuição sem rede real
-    def _redistribuir_mock(self):
+    # Guarda o método original antes de substituir
+    _redistribuir_original = CoordenadarLogica._redistribuir
+
+    def _redistribuir_mock(self, pool_snapshot):
         with lock_r:
-            redistribuicoes.append(len(self._pool))
-        # não envia de verdade — apenas registra
+            redistribuicoes.append(len(pool_snapshot))
+
     CoordenadarLogica._redistribuir = _redistribuir_mock
+
+    coord = CoordenadarLogica(meu_id=2)
+    nos_ativos = ["M1", "M3", "M5"]
 
     t0 = time.perf_counter()
     for i, origem in enumerate(nos_ativos):
         msg = criar_mensagem_migracao_mock(origem, ciclo=1, lamport_ts=i+1)
         coord.receber_migracao(msg)
 
-    # M2 também envia (como trabalhador)
     msg = criar_mensagem_migracao_mock("M2", ciclo=1, lamport_ts=4)
     coord.receber_migracao(msg)
 
@@ -187,30 +161,20 @@ def cenario_2_falha_trabalhador():
     log_resultado(True, "M4 ausente não bloqueou o sistema")
     log_resultado(True, "No próximo ciclo M4 pode retornar normalmente")
 
+    # Restaura o método original corretamente
+    CoordenadarLogica._redistribuir = _redistribuir_original
+
     print("""
   SOLUÇÃO IMPLEMENTADA:
     coordenador_logica.py → CoordenadarLogica.receber_migracao()
     config.py             → THRESHOLD = 0.80
     """)
 
-    # Restaura método original
-    from coordenador_logica import CoordenadarLogica as CL
-    CoordenadarLogica._redistribuir = CL._redistribuir
-
 
 # ── Cenário 3: Dados obsoletos via Lamport ───────────────────────────────────
 
 def cenario_3_dados_obsoletos_lamport():
     log_cenario(3, "Dados obsoletos — descarte via Relógio de Lamport")
-
-    print("""
-  DESCRIÇÃO:
-    Um nó atrasado envia indivíduos de um ciclo anterior (ts=2) após o
-    coordenador já ter recebido dados mais recentes desse nó (ts=5).
-    O coordenador descarta os dados antigos sem comprometer o pool global.
-
-  SIMULAÇÃO:
-    """)
 
     coord = CoordenadarLogica(meu_id=2)
 
@@ -245,32 +209,6 @@ def cenario_3_dados_obsoletos_lamport():
 def cenario_4_falha_redistribuicao_parcial():
     log_cenario(4, "Falha durante redistribuição parcial")
 
-    print("""
-  DESCRIÇÃO:
-    O coordenador falha após redistribuir para M1 e M3, mas antes de
-    enviar para M4 e M5. Os nós que receberam avançam; os outros esperam.
-    Ao eleger novo coordenador, os nós atrasados precisam receber migrantes
-    do ciclo que ficou incompleto.
-
-  SOLUÇÃO ADOTADA — reinício de ciclo:
-    Após eleger novo coordenador, todos os nós que ainda não receberam
-    migrantes atingem o timeout de 30s em ReceberMigrantes.wait().
-    O loop de evolução continua para o próximo ciclo e envia novos
-    migrantes ao novo coordenador. Os dados do ciclo incompleto são
-    descartados naturalmente pelo timestamp de Lamport.
-
-  VANTAGENS desta abordagem:
-    + Simples de implementar (sem estado distribuído complexo)
-    + Nós avançados apenas têm uma pequena vantagem de um ciclo
-    + O sistema se auto-corrige no próximo ciclo de migração
-
-  DESVANTAGENS:
-    - M4 e M5 ficam um ciclo sem migrantes (apenas evolução local)
-    - Pequena inconsistência temporária entre subpopulações
-
-  SIMULAÇÃO:
-    """)
-
     # Simula o timeout de espera de migrantes
     evento = threading.Event()
     t0 = time.perf_counter()
@@ -290,59 +228,6 @@ def cenario_4_falha_redistribuicao_parcial():
     """)
 
 
-# ── Cenário 5: Falso positivo de falha (rede lenta) ──────────────────────────
-
-def cenario_5_falso_positivo():
-    log_cenario(5, "Falso positivo — coordenador lento vs coordenador morto")
-
-    print("""
-  DESCRIÇÃO:
-    O coordenador está sobrecarregado (processando grande pool) e demora
-    mais que o timeout do heartbeat para responder ao ObterStatus.
-    Sem calibração adequada, os nós iniciariam uma eleição desnecessária.
-
-  ANÁLISE DO TRADEOFF:
-    ┌─────────────────────┬────────────────────────────────────────────┐
-    │ Timeout muito curto │ Eleições espúrias — sistema instável       │
-    │ Timeout muito longo │ Sistema parado por muito tempo em falha    │
-    │ Timeout calibrado   │ Equilíbrio entre detecção e estabilidade   │
-    └─────────────────────┴────────────────────────────────────────────┘
-
-  CRITÉRIO DE CALIBRAÇÃO:
-    timeout_heartbeat > tempo_máximo_de_processamento_do_coordenador
-
-    Estimativa:
-      - Receber 5 × 30 indivíduos: ~negligível
-      - Ordenar pool (150 indivíduos): ~negligível
-      - Enviar para 4 nós via rede local: ~1-2s
-      - Margem de segurança: ×3
-      → TIMEOUT_RPC = 5s   (config.py)
-      → INTERVALO_HEARTBEAT = 3s  (config.py)
-
-  SIMULAÇÃO:
-    """)
-
-    tempos_coord = [0.2, 0.5, 1.0, 2.0, 3.0, 5.0, 6.0]
-    timeout      = 5.0
-
-    print(f"  {'Tempo proc. coord.':<22} {'Resultado'}")
-    print(f"  {'-'*22} {'-'*30}")
-    for t in tempos_coord:
-        if t < timeout:
-            resultado = "OK — heartbeat respondido a tempo"
-        else:
-            resultado = "ELEIÇÃO INICIADA — timeout atingido"
-        print(f"  {t:.1f}s{'':<19} {resultado}")
-
-    log_resultado(True, f"Timeout = {timeout}s cobre processamento normal do coordenador")
-    log_resultado(True, "Eleições só ocorrem em falhas reais (>5s sem resposta)")
-
-    print("""
-  CONFIGURADO EM:
-    config.py → TIMEOUT_RPC = 5
-    config.py → INTERVALO_HEARTBEAT = 3
-    """)
-
 
 # ── Sumário ───────────────────────────────────────────────────────────────────
 
@@ -357,16 +242,15 @@ def sumario():
   │ Coordenador offline        │ Algoritmo do Valentão (Bully)      │
   │ Nó trabalhador offline     │ Threshold assíncrono (80%)         │
   │ Dados obsoletos na rede    │ Relógio Lógico de Lamport          │
-  │ Redistribuição parcial     │ Timeout + reinício do ciclo        │
-  │ Falso positivo de falha    │ Timeout calibrado (5s × 3× margem) │
+  │ Redistribuição parcial     │ Timeout + reinício do ciclo        │ │
   └─────────────────────────────────────────────────────────────────┘
 
   Arquivos de implementação:
-    eleicao_bully.py      → GerenciadorEleicao (cenários 1, 5)
-    coordenador_logica.py → CoordenadarLogica  (cenários 2, 3)
-    relogio_lamport.py    → RelogioLamport     (cenário 3)
-    no_servidor.py        → rodar_evolucao()   (cenário 4)
-    config.py             → TIMEOUT_RPC, THRESHOLD, INTERVALO_HEARTBEAT
+    eleicao_bully.py → GerenciadorEleicao (cenários 1, 5)
+    coordenador_logica.py → CoordenadarLogica (cenários 2, 3)
+    relogio_lamport.py → RelogioLamport (cenário 3)
+    no_servidor.py → rodar_evolucao() (cenário 4)
+    config.py → TIMEOUT_RPC, THRESHOLD, INTERVALO_HEARTBEAT
     """)
     print(SEP + "\n")
 
@@ -383,5 +267,4 @@ if __name__ == "__main__":
     cenario_2_falha_trabalhador()
     cenario_3_dados_obsoletos_lamport()
     cenario_4_falha_redistribuicao_parcial()
-    cenario_5_falso_positivo()
     sumario()

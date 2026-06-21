@@ -5,6 +5,7 @@
 import grpc
 import threading
 import logging
+import time
 
 import genetico_pb2
 import genetico_pb2_grpc
@@ -27,17 +28,21 @@ TIMEOUT_MIGRANTES = 10   # segundos
 class NoServidor(genetico_pb2_grpc.GeneticoServiceServicer):
 
     def __init__(self, meu_id: int):
+        self.t_inicio = time.time()
         self.meu_id = meu_id
         self.meu_nome = f"M{meu_id}"
         self.meu_endereco = NOS[meu_id]
 
-        self.populacao = ga.fatia_do_no(meu_id) #AJUSTAR
+        self.populacao = ga.fatia_do_no(meu_id) 
         self.geracao_atual = 0
         self.ciclo_atual = 0
-        self._pop_lock = threading.Lock()
+        self._pop_lock = threading.Lock() #protege de ser lida e escrita ao mesmo tempo
 
-        self.relogio = RelogioLamport()
+        self.relogio = RelogioLamport() 
 
+        '''
+        Define o líder, caso seja instanciado M2, mas cada nó aponta para o coordenador inicial (M2)
+        '''
         self.eleicao = GerenciadorEleicao(meu_id, self)
         self.eleicao.definir_lider(
             ID_COORDENADOR_INICIAL,
@@ -71,7 +76,7 @@ class NoServidor(genetico_pb2_grpc.GeneticoServiceServicer):
             self.coordenador = CoordenadarLogica(self.meu_id)
 
     # ── Stubs gRPC ────────────────────────────────────────────────────────────
-
+    #retorna a conexão já existente para um certo endereço, ou cria uma nova, caso seja a primeira vez
     def get_stub(self, endereco: str):
         with self._stubs_lock:
             if endereco not in self._stubs:
@@ -215,10 +220,13 @@ class NoServidor(genetico_pb2_grpc.GeneticoServiceServicer):
                 ciclos_sem_melhora = 0
 
             melhor_fit_anterior = melhor_fit
+        
 
         # ── Resultado final ────────────────────────────────────────────────────
         with self._pop_lock:
             melhor = ga.melhor_individuo(self.populacao)
+        
+        tempo_total = time.time() - self.t_inicio
 
         logger.info(
             f"\n{'='*60}\n"
@@ -226,5 +234,6 @@ class NoServidor(genetico_pb2_grpc.GeneticoServiceServicer):
             f" Melhor rota: {' -> '.join(melhor)}\n"
             f" Distância total: {ga.distancia_total(melhor):.4f}\n"
             f" Fitness: {ga.fitness(melhor):.6f}\n"
+            f"Tempo total:{tempo_total:.2f}s\n"
             f"{'='*60}"
         )

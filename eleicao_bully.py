@@ -28,12 +28,12 @@ class GerenciadorEleicao:
         meu_id  : identificador numérico deste nó
         no_ref  : referência ao NoServidor (para acessar get_stub e ativar_coordenador)
         """
-        self.meu_id          = meu_id
-        self.no_ref          = no_ref
-        self.lider_id        = None
-        self.lider_endereco  = None
-        self._em_eleicao     = False
-        self._lock           = threading.Lock()
+        self.meu_id = meu_id
+        self.no_ref = no_ref
+        self.lider_id = None
+        self.lider_endereco = None
+        self._em_eleicao = False
+        self._lock = threading.Lock()
 
     # ── Estado do líder ───────────────────────────────────────────────────────
 
